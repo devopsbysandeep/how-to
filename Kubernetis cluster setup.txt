@@ -60,8 +60,8 @@ kubeadm init --apiserver-advertise-address=192.168.1.156 --pod-network-cidr=172.
 
 OUTPUT
 
-kubeadm join 192.168.1.156:6443 --token 4hco2r.d75eww15sp161uo6 \
-        --discovery-token-ca-cert-hash sha256:25a69d7b30907ef1fd453701d04b65445ca4a1728e3cccc6e03d189029e999ef
+kubeadm join 192.168.1.156:6443 --token 4hco2r.d75ew........ \
+        --discovery-token-ca-cert-hash sha256:25...........
 		
 		
 -----now you can see kubeadm join command copy it on worker node to join cluster-----

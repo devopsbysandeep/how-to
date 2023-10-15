@@ -1,0 +1,9 @@
+Ansible
+
+nmcli connection modify "enp0s3" ipv4.method manual ipv4.address 192.168.1.36/24 ipv4.dns 8.8.8.8 ipv4.gateway 192.168.1.1
+hostnamectl set-hostname ansible-cm.lab.dev
+
+# yum install -y python3
+# yum install epel-release
+# yum install ansible
+# ansible --version

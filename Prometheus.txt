@@ -1,0 +1,163 @@
+Prometheus
+
+nmcli connection modify "enp0s3" ipv4.method manual ipv4.address 192.168.1.59/24 ipv4.dns 8.8.8.8 ipv4.gateway 192.168.1.1
+
+hostnamectl set-hostname prometheus.lab.dev
+
+1. Prepare Server for Prometheus installation
+We’ll have to perform a number of actions before installing Prometheus server on CentOS 7 / RHEL 7 Linux system.
+
+Create Prometheus system group
+Let’s start by creating the Prometheus system group. You need to use the option  -r or –system with groupadd command.
+
+# groupadd --system prometheus
+The group with ID < 1000 is a system group.
+
+Create Prometheus system user
+Let’s now create Prometheus system user and assign primary group we just created above.
+
+
+# sudo useradd -s /sbin/nologin --system -g prometheus prometheus
+This is a system user which doesn’t need /bin/bash shell, that’s why we used -s /sbin/nologin.
+
+Create data directory for Prometheus
+Prometheus needs a directory to store its data. We will create one under /var/lib/prometheus. We will specify this data directory when starting the service.
+
+# sudo mkdir /var/lib/prometheus
+Create configuration directories for Prometheus
+Prometheus primary configuration files directory is /etc/prometheus/. It will have some sub-directories.
+
+
+# for i in rules rules.d files_sd; do sudo mkdir -p /etc/prometheus/${i}; done
+
+2. Download and Install Prometheus Server
+We need to download the latest release of Prometheus archive and extract it to get binary files. You can check releases from Prometheus releases Github page.
+
+
+Install wget.
+
+# sudo yum -y install wget
+
+The download latest binary archive for Prometheus.
+
+# mkdir -p /tmp/prometheus && cd /tmp/prometheus
+# curl -s https://api.github.com/repos/prometheus/prometheus/releases/latest \
+  | grep browser_download_url \
+  | grep linux-amd64 \
+  | cut -d '"' -f 4 \
+  | wget -qi -
+
+Extract the file.
+
+# tar xvf prometheus*.tar.gz
+
+Move the prometheus binary files to /usr/local/bin/
+Since /usr/local/bin/ is in your PATH, let’s copy binary files to it.
+# cd prometheus*/
+# sudo mv prometheus promtool /usr/local/bin/
+
+Move prometheus configuration template to /etc directory.
+
+# sudo mv prometheus.yml  /etc/prometheus/prometheus.yml
+Also move consoles and console_libraries to /etc/prometheus directory:
+
+# sudo mv consoles/ console_libraries/ /etc/prometheus/
+# cd ~/
+# rm -rf /tmp/prometheus
+Create/Edit a Prometheus configuration file
+
+Prometheus configuration file will be located under /etc/prometheus/prometheus.yml.
+# sudo vim /etc/prometheus/prometheus.yml
+
+
+The template configurations should look similar to below:
+# my global config
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+    - targets: ['localhost:9090']
+You can edit the file to your default liking and save it.
+
+
+3. Create Prometheus systemd Service unit file
+To be able to manage Prometheus service with systemd, you need to explicitly define this unit file.
+
+# sudo vim /etc/systemd/system/prometheus.service 
+[Unit]
+Description=Prometheus
+Documentation=https://prometheus.io/docs/introduction/overview/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+Environment="GOMAXPROCS=1"
+User=prometheus
+Group=prometheus
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=/usr/local/bin/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --storage.tsdb.path=/var/lib/prometheus \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries \
+  --web.listen-address=0.0.0.0:9090 \
+  --web.external-url=
+
+SyslogIdentifier=prometheus
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+Environment="GOMAXPROCS=1
+
+Replace 1 with the number of vcpus on your server.
+
+4. Set Permissions, Firewall and Start Prometheus Service
+Change the ownership of these directories to Prometheus user and group.
+
+# for i in rules rules.d files_sd; do sudo chown -R prometheus:prometheus /etc/prometheus/${i}; done
+# for i in rules rules.d files_sd; do sudo chmod -R 775 /etc/prometheus/${i}; done
+# sudo chown -R prometheus:prometheus /var/lib/prometheus/
+
+Start and enable prometheus service:
+
+# sudo systemctl daemon-reload
+# sudo systemctl start prometheus
+# sudo systemctl enable prometheus
+# systemctl status prometheus
+
+
+Open a port on the firewall.
+
+# sudo firewall-cmd --add-port=9090/tcp --permanent
+# sudo firewall-cmd --reload
+
+Access via
+http://192.168.1.59:9090
+
+
+###################################################

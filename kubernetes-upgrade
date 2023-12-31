@@ -1,0 +1,59 @@
+  72  kubectl get nodes
+   73  kubectl get pods
+   74  kubectl get pods --all-namespaces
+   75  kubectl get pods
+   76  kubectl get nodes
+   77  yum list --showduplicates kubeadm --disableexcludes=kubernetes
+   78  kubeadm upgrade plan
+   79  cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+exclude=kubelet kubeadm kubectl
+EOF
+
+   80  yum clean all
+   81  ps -aux | grep yum
+   82  yum clean all
+   83  kubeadm upgrade plan
+   84  kubeadm upgrade apply v1.27.0
+   85  kubeadm upgrade apply v1.27.0-00
+   86  yum list --showduplicates kubeadm --disableexcludes=kubernetes
+   87  yum install -y kubeadm-1.27.0-0 --disableexcludes=kubernetes
+   88  kubeadm get nodes
+   89  kubectl get nodes
+   90  kubeadm upgrade plan
+   91  yum install -y kubeadm-1.27.0-0 --disableexcludes=kubernetes
+   92  yum list --showduplicates kubeadm --disableexcludes=kubernetes
+   93  kubeadm upgrade plan
+   94  kubeadm upgrade apply v1.27.9
+   95  kubeadm upgrade apply v1.27.0
+   96  systemctl restart kubelet
+   97  kubectl get nodes
+   98  yum upgade kubelet=1.27.0
+   99  yum updade kubelet=1.27.0
+  100  yum update kubelet=1.27.0
+  101  yum update kubelet=1.27.0-00
+  102  yum list --showduplicates kubelet --disableexcludes=kubernetes
+  103  yum update kubelet=1.27.0-0
+  104  yum install kubelet=1.27.0-0
+  105  yum update kubelet
+  106  yum clean all
+  107  kubectl get nodes
+  108  kubectl drain prod-k8s-master.lab.dev --ignore-daemonsets
+  109  kubectl get nodes
+  110  yum install -y kubelet-'1.27.0-0' kubectl-'1.27.0-0' --disableexcludes=kubernetes
+  111  kubectl uncordon prod-k8s-master.lab.dev
+  112  kubectl get nodes
+  113  systemctl restart kubelet
+  114  kubectl get nodes
+  115  history
+  116  kubectl get nodes
+  117  kubectl drain prod-k8s-worker01.lab.dev --ignore-daemonsets
+  118  kubectl get nodes
+  119  kubectl uncordon prod-k8s-worker01.lab.dev
+  120  kubectl get nodes
+  121  history

@@ -1,0 +1,9 @@
+## Install Helm
+
+  126  wget https://get.helm.sh/helm-v3.13.3-linux-amd64.tar.gz
+  127  ll
+  128  tar -zxvf helm-v3.13.3-linux-amd64.tar.gz
+  129  ll
+  130  mv linux-amd64/helm /usr/local/bin/helm
+  131  ll /usr/local/bin/helm
+  132  helm
